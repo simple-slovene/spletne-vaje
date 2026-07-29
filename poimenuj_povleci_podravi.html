@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Slovene - Pozdravi</title>
+<style>
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f7f4;color:#2d2d2d}
+.container{max-width:1000px;margin:40px auto;padding:20px}
+h1{text-align:center;color:#2d7a50}
+.instructions{text-align:center;color:#555;font-size:22px;margin-top:-8px;margin-bottom:20px}
+.progress-wrap{background:#dfe9e1;height:18px;border-radius:20px;overflow:hidden;margin:25px 0 35px}
+.progress{background:#56a56c;width:0;height:100%;transition:.3s}
+.game{display:grid;grid-template-columns:2fr 1fr;gap:40px}
+.images{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,.08);text-align:center}
+.picture{width:100%;height:180px;object-fit:cover;border-radius:12px;background:#eef8f1}
+.dropzone{margin-top:12px;min-height:50px;border:2px dashed #56a56c;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#eef8f1}
+.words{display:flex;flex-direction:column;gap:14px}
+.word{background:#fff;padding:14px;border-radius:14px;cursor:move;box-shadow:0 4px 10px rgba(0,0,0,.08);text-align:center;font-size:20px}
+.correct{border:3px solid #1f9b45}
+.wrong{border:3px solid #d63b3b}
+.footer{text-align:center;margin-top:30px}
+button{padding:12px 20px;border:none;border-radius:14px;background:#56a56c;color:#fff;margin:5px;cursor:pointer}
+.secondary{background:#8aa59a}
+@media(max-width:800px){.game{grid-template-columns:1fr}.images{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Simple Slovene</h1>
+<div class="instructions">Pozdravite.</div>
+
+<div class="progress-wrap"><div class="progress" id="progress"></div></div>
+
+<div class="game">
+<div class="images">
+
+<div class="card">
+<img src="images/dobro_jutro.jpg" class="picture" alt="Dobro jutro">
+<div class="dropzone" data-answer="Dobro jutro!"></div>
+</div>
+
+<div class="card">
+<img src="images/dober_dan.jpg" class="picture" alt="Dober dan">
+<div class="dropzone" data-answer="Dober dan!"></div>
+</div>
+
+<div class="card">
+<img src="images/dober_vecer.jpg" class="picture" alt="Dober večer">
+<div class="dropzone" data-answer="Dober večer!"></div>
+</div>
+
+<div class="card">
+<img src="images/nasvidenje.jpg" class="picture" alt="Nasvidenje">
+<div class="dropzone" data-answer="Nasvidenje!"></div>
+</div>
+
+</div>
+
+<div class="words" id="words">
+<div class="word" draggable="true" id="Dobro jutro!">Dobro jutro!</div>
+<div class="word" draggable="true" id="Dober dan!">Dober dan!</div>
+<div class="word" draggable="true" id="Dober večer!">Dober večer!</div>
+<div class="word" draggable="true" id="Nasvidenje!">Nasvidenje!</div>
+</div>
+</div>
+
+<div class="footer">
+<h2 id="score">0 / 4 pravilno</h2>
+<button onclick="checkAnswers()">✓ Preverite</button>
+<button class="secondary" onclick="resetGame()">↺ Začnite znova</button>
+<button id="nextButton" style="display:none">➡ Naslednja vaja</button>
+</div>
+</div>
+
+<script>
+let dragged=null;
+const words=document.getElementById("words");
+function shuffle(){[...words.children].sort(()=>Math.random()-0.5).forEach(x=>words.appendChild(x))}
+shuffle();
+document.querySelectorAll(".word").forEach(w=>w.addEventListener("dragstart",()=>dragged=w));
+document.querySelectorAll(".dropzone").forEach(z=>{
+z.addEventListener("dragover",e=>e.preventDefault());
+z.addEventListener("drop",e=>{
+e.preventDefault();
+if(!dragged)return;
+if(z.firstChild)words.appendChild(z.firstChild);
+z.appendChild(dragged);
+updateProgress();
+});
+});
+function updateProgress(){
+let p=document.querySelectorAll(".dropzone .word").length;
+document.getElementById("progress").style.width=(p/4*100)+"%";
+}
+function checkAnswers(){
+let c=0;
+document.querySelectorAll(".dropzone").forEach(z=>{
+z.classList.remove("correct","wrong");
+if(z.firstChild&&z.firstChild.id===z.dataset.answer){z.classList.add("correct");c++;}
+else{z.classList.add("wrong");}
+});
+document.getElementById("score").textContent=(c===4?"🎉 Odlično! ":"⭐ ")+c+" / 4 pravilno";
+document.getElementById("nextButton").style.display="inline-block";
+}
+function resetGame(){
+document.querySelectorAll(".dropzone").forEach(z=>{
+z.classList.remove("correct","wrong");
+while(z.firstChild)words.appendChild(z.firstChild);
+});
+shuffle();
+updateProgress();
+document.getElementById("score").textContent="0 / 4 pravilno";
+document.getElementById("nextButton").style.display="none";
+}
+</script>
+</body>
+</html>
