@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="sl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simple Slovene - Vaja 3</title>
+<style>
+body{margin:0;background:#f3f7f4;font-family:Arial,sans-serif;color:#2d2d2d}
+.container{max-width:1100px;margin:40px auto;padding:20px}
+h1{text-align:center;color:#2d7a50}
+.progress-wrap{background:#dfe9e1;height:18px;border-radius:20px;overflow:hidden;margin:20px 0 30px}
+.progress{background:#56a56c;height:100%;width:0;transition:.3s}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.col{background:#fff;border-radius:18px;padding:18px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.col h2{text-align:center;color:#2d7a50}
+.drop{min-height:260px;border:2px dashed #56a56c;border-radius:12px;padding:10px}
+.words{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:25px 0}
+.word{background:#fff;padding:10px 16px;border-radius:12px;cursor:move;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.correct{border:3px solid #1f9b45}.wrong{border:3px solid #d63b3b}
+.footer{text-align:center}button{border:none;border-radius:14px;padding:11px 18px;background:#56a56c;color:#fff;margin:6px;cursor:pointer}.secondary{background:#8aa59a}
+</style></head><body>
+<div class="container">
+<h1>Simple Slovene</h1>
+<div class="progress-wrap"><div class="progress" id="progress"></div></div>
+<div class="words" id="words">
+<div class="word" draggable="true" id="moški">moški</div>
+<div class="word" draggable="true" id="miza">miza</div>
+<div class="word" draggable="true" id="srce">srce</div>
+<div class="word" draggable="true" id="pes">pes</div>
+<div class="word" draggable="true" id="okno">okno</div>
+<div class="word" draggable="true" id="ženska">ženska</div>
+<div class="word" draggable="true" id="drevo">drevo</div>
+<div class="word" draggable="true" id="hiša">hiša</div>
+<div class="word" draggable="true" id="robot">robot</div>
+</div>
+<div class="cols">
+<div class="col"><h2>Moški spol</h2><div class="drop" data-g="m"></div></div>
+<div class="col"><h2>Ženski spol</h2><div class="drop" data-g="z"></div></div>
+<div class="col"><h2>Srednji spol</h2><div class="drop" data-g="s"></div></div>
+</div>
+<div class="footer">
+<h2 id="score">0 / 9 pravilno</h2>
+<button onclick="check()">✓ Preverite</button>
+<button class="secondary" onclick="resetGame()">↺ Začnite znova</button>
+<button id="next" style="display:none" onclick="window.location.href='https://24ur.com'">➡ Naslednja vaja</button>
+</div></div>
+<script>
+const map={moški:"m",pes:"m",robot:"m",miza:"z","ženska":"z","hiša":"z",srce:"s",okno:"s",drevo:"s"};
+let dragged=null,words=document.getElementById("words");
+[...words.children].sort(()=>Math.random()-0.5).forEach(x=>words.appendChild(x));
+document.querySelectorAll(".word").forEach(w=>w.addEventListener("dragstart",()=>dragged=w));
+document.querySelectorAll(".drop").forEach(d=>{
+ d.addEventListener("dragover",e=>e.preventDefault());
+ d.addEventListener("drop",e=>{e.preventDefault();if(dragged)d.appendChild(dragged);update();});
+});
+function update(){let p=document.querySelectorAll(".drop .word").length;progress.style.width=(p/9*100)+"%";}
+function check(){let c=0;document.querySelectorAll(".drop").forEach(d=>{d.classList.remove("correct","wrong");let ok=true;[...d.children].forEach(w=>{if(map[w.id]!=d.dataset.g)ok=false;else c++;});d.classList.add(ok?"correct":"wrong");});score.textContent=(c==9?"🎉 Odlično! ":"⭐ ")+c+" / 9 pravilno";next.style.display="inline-block";}
+function resetGame(){document.querySelectorAll(".drop").forEach(d=>{d.classList.remove("correct","wrong");while(d.firstChild)words.appendChild(d.firstChild)});[...words.children].sort(()=>Math.random()-0.5).forEach(x=>words.appendChild(x));progress.style.width="0%";score.textContent="0 / 9 pravilno";next.style.display="none";}
+</script></body></html>
