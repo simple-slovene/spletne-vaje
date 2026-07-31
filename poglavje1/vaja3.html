@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Simple Slovene - Pozdravi</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#f3f7f4;
+color:#333;
+}
+
+.container{
+max-width:1100px;
+margin:40px auto;
+padding:20px;
+}
+
+.logo{
+text-align:center;
+margin-bottom:20px;
+}
+
+.logo img{
+width:100%;
+max-width:460px;
+display:block;
+margin:auto;
+}
+
+.instructions{
+text-align:center;
+font-size:26px;
+margin-bottom:20px;
+font-weight:normal;
+}
+
+.progress-wrap{
+height:18px;
+background:#dfe9e1;
+border-radius:20px;
+overflow:hidden;
+margin-bottom:30px;
+}
+
+.progress{
+width:0;
+height:100%;
+background:#56a56c;
+transition:.3s;
+}
+
+.images{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+}
+
+.card{
+background:#fff;
+padding:20px;
+border-radius:18px;
+box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.picture{
+width:100%;
+height:180px;
+object-fit:cover;
+border-radius:12px;
+}
+
+.answer{
+width:100%;
+box-sizing:border-box;
+margin-top:12px;
+padding:12px;
+border:2px dashed #56a56c;
+border-radius:12px;
+background:#eef8f1;
+font-size:20px;
+text-align:center;
+outline:none;
+transition:.2s;
+}
+
+.answer::placeholder{
+font-style:italic;
+font-weight:300;
+opacity:.45;
+}
+
+.answer.correct{
+border:3px solid #1b9e44;
+background:#f0fff4;
+}
+
+.answer.wrong{
+border:3px solid #d64040;
+background:#fff2f2;
+}
+
+.footer{
+text-align:center;
+margin-top:35px;
+}
+
+button{
+padding:12px 24px;
+border:none;
+border-radius:14px;
+background:#56a56c;
+color:#fff;
+margin:6px;
+font-size:18px;
+cursor:pointer;
+}
+
+.secondary{
+background:#8aa59a;
+}
+
+#nextButton{
+display:none;
+}
+
+@media(max-width:900px){
+
+.container{
+padding:12px;
+}
+
+.images{
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+}
+
+.picture{
+height:120px;
+}
+
+.card{
+padding:12px;
+}
+
+.answer{
+font-size:16px;
+padding:10px;
+}
+
+.instructions{
+font-size:20px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 class="logo">
+<img src="https://simple-slovene.github.io/spletne-vaje/slike/Logotip.png">
+</h1>
+
+<div class="instructions">
+Vaja 3 - Napišite pozdrav.
+</div>
+
+<div class="progress-wrap">
+<div class="progress" id="progress"></div>
+</div>
+
+<div class="images">
+
+<div class="card">
+<img class="picture" src="https://simple-slovene.github.io/spletne-vaje/slike/lahko_noc.png">
+<input class="answer" data-answer="Lahko noč" placeholder="napišite odgovor">
+</div>
+
+<div class="card">
+<img class="picture" src="https://simple-slovene.github.io/spletne-vaje/slike/dobro_jutro.jpg">
+<input class="answer" data-answer="Dobro jutro" placeholder="napišite odgovor">
+</div>
+
+<div class="card">
+<img class="picture" src="https://simple-slovene.github.io/spletne-vaje/slike/nasvidenje.jpg">
+<input class="answer" data-answer="Nasvidenje" placeholder="napišite odgovor">
+</div>
+
+<div class="card">
+<img class="picture" src="https://simple-slovene.github.io/spletne-vaje/slike/dober_vecer.jpg">
+<input class="answer" data-answer="Dober večer" placeholder="napišite odgovor">
+</div>
+
+</div>
+
+<div class="footer">
+
+<h2 id="score">0 / 4 pravilno</h2>
+
+<button onclick="checkAnswers()">✓ Preverite</button>
+
+<button class="secondary" onclick="resetGame()">↺ Začnite znova</button>
+
+<button id="nextButton"
+onclick="location.href='https://simple-slovene.github.io/spletne-vaje/poglavje1/vaja4.html'">
+➡ Naprej
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+const inputs=document.querySelectorAll(".answer");
+const progress=document.getElementById("progress");
+function normalize(txt){
+
+return txt
+.toLowerCase()
+.trim()
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,"");
+
+}
+
+inputs.forEach(i=>{
+
+i.addEventListener("input",()=>{
+
+const filled=[...inputs].filter(x=>x.value.trim()!="").length;
+
+progress.style.width=(filled/inputs.length*100)+"%";
+
+});
+
+});
+
+function successSound(){
+
+const c=new(window.AudioContext||window.webkitAudioContext)();
+
+[523,659,784,1047].forEach((f,i)=>{
+
+const o=c.createOscillator();
+const g=c.createGain();
+
+o.type="triangle";
+o.frequency.value=f;
+
+o.connect(g);
+g.connect(c.destination);
+
+let t=c.currentTime+i*.08;
+
+g.gain.setValueAtTime(.0001,t);
+g.gain.exponentialRampToValueAtTime(.18,t+.02);
+g.gain.exponentialRampToValueAtTime(.0001,t+.18);
+
+o.start(t);
+o.stop(t+.19);
+
+});
+
+}
+
+function failSound(){
+
+const c=new(window.AudioContext||window.webkitAudioContext)();
+
+const o=c.createOscillator();
+const g=c.createGain();
+
+o.type="triangle";
+
+o.frequency.setValueAtTime(260,c.currentTime);
+o.frequency.linearRampToValueAtTime(170,c.currentTime+.35);
+
+o.connect(g);
+g.connect(c.destination);
+
+g.gain.setValueAtTime(.18,c.currentTime);
+g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.35);
+
+o.start();
+o.stop(c.currentTime+.35);
+
+}
+
+function checkAnswers(){
+
+let ok=0;
+
+inputs.forEach(i=>{
+
+i.classList.remove("correct","wrong");
+
+if(normalize(i.value)==normalize(i.dataset.answer)){
+
+i.classList.add("correct");
+ok++;
+
+}else{
+
+i.classList.add("wrong");
+
+}
+
+});
+
+document.getElementById("score").textContent=
+ok+" / "+inputs.length+" pravilno";
+
+if(ok==inputs.length){
+
+successSound();
+
+document.getElementById("nextButton").style.display="inline-block";
+
+}else{
+
+failSound();
+
+document.getElementById("nextButton").style.display="none";
+
+}
+
+}
+
+function resetGame(){
+
+inputs.forEach(i=>{
+
+i.value="";
+i.classList.remove("correct","wrong");
+
+});
+
+progress.style.width="0%";
+
+document.getElementById("score").textContent=
+"0 / "+inputs.length+" pravilno";
+
+document.getElementById("nextButton").style.display="none";
+
+}
+
+</script>
+
+</body>
+</html>

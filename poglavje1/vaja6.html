@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Slovene</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f7f4;margin:0;color:#333}
+.container{max-width:1000px;margin:30px auto;padding:20px}
+.logo{text-align:center;margin-bottom:20px}
+.logo img{width:100%;max-width:460px;height:auto;display:block;margin:0 auto}
+.instructions{text-align:center;font-size:22px;margin-bottom:25px}
+.progress-wrap{height:18px;background:#dfe9e1;border-radius:20px;overflow:hidden;margin-bottom:30px}
+.progress{height:100%;width:0;background:#56a56c;transition:.3s}
+.game{display:grid;grid-template-columns:1fr 1fr;gap:35px}
+.card,.word{background:#fff;border-radius:14px;padding:16px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+.card{font-size:22px}
+.dropzone{margin-top:10px;min-height:44px;border:2px dashed #56a56c;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#eef8f1}
+.word{font-size:20px;text-align:center;cursor:pointer;margin-bottom:12px;user-select:none}
+.word.selected{background:#56a56c;color:#fff}
+.dropzone.active{box-shadow:0 0 0 3px #9bd2aa inset}
+.correct{border:3px solid #1f9b45}.wrong{border:3px solid #d63b3b}
+.footer{text-align:center;margin-top:30px}
+button,a.btn{padding:12px 20px;border:none;border-radius:12px;background:#56a56c;color:#fff;margin:5px;cursor:pointer;text-decoration:none;display:inline-block}
+.secondary{background:#8aa59a}
+@media(max-width:800px){.game{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1 class="logo">
+<img src="https://simple-slovene.github.io/spletne-vaje/slike/Logotip.png" alt="Simple Slovene">
+</h1>
+<div class="instructions">Izberite odgovor in pritisnite prazen prostor.</div>
+<div class="progress-wrap"><div id="progress" class="progress"></div></div>
+<div class="game">
+<div>
+<div class="card">Živjo!<div class="dropzone" data-answer="Zdravo!"></div></div><br>
+<div class="card">Nasvidenje!<div class="dropzone" data-answer="Adijo!"></div></div><br>
+<div class="card">Kako ste?<div class="dropzone" data-answer="Dobro, hvala!"></div></div><br>
+<div class="card">Hvala.<div class="dropzone" data-answer="Prosim."></div></div><br>
+<div class="card">Jaz sem Vanda.<div class="dropzone" data-answer="Me veseli!"></div></div>
+</div>
+<div id="bank">
+<div class="word">Zdravo!</div><div class="word">Adijo!</div><div class="word">Dobro, hvala!</div><div class="word">Prosim.</div><div class="word">Me veseli!</div>
+</div></div>
+<div class="footer">
+<h2 id="score">0 / 5 pravilno</h2>
+<button onclick="checkAnswers()">✓ Preverite</button>
+<button class="secondary" onclick="resetGame()">↺ Začnite znova</button>
+<a id="nextBtn" class="btn" href="https://simple-slovene.github.io/spletne-vaje/poglavje1/vaja7.html" style="display:none">➡Naprej</a>
+</div>
+<script>
+const bank=document.getElementById('bank');let selected=null;
+[...bank.children].sort(()=>Math.random()-0.5).forEach(x=>bank.appendChild(x));
+document.querySelectorAll('.word').forEach(w=>w.onclick=()=>{document.querySelectorAll('.word').forEach(x=>x.classList.remove('selected'));selected=w;w.classList.add('selected');document.querySelectorAll('.dropzone').forEach(z=>z.classList.add('active'));});
+document.querySelectorAll('.dropzone').forEach(z=>z.onclick=()=>{if(!selected)return;if(z.firstChild)bank.appendChild(z.firstChild);z.appendChild(selected);selected.classList.remove('selected');selected=null;document.querySelectorAll('.dropzone').forEach(d=>d.classList.remove('active'));updateProgress();});
+function updateProgress(){let n=document.querySelectorAll('.dropzone .word').length;document.getElementById('progress').style.width=(n/5*100)+'%';}
+function playVictory(){const ctx=new(window.AudioContext||window.webkitAudioContext)();const notes=[523.25,659.25,783.99,1046.5,783.99,1046.5];notes.forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(ctx.destination);const t=ctx.currentTime+i*0.11;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.18,t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,t+0.18);o.start(t);o.stop(t+0.19);});}
+function playFail(){const ctx=new(window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.setValueAtTime(260,ctx.currentTime);o.frequency.linearRampToValueAtTime(170,ctx.currentTime+0.35);o.connect(g);g.connect(ctx.destination);g.gain.setValueAtTime(.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.35);o.start();o.stop(ctx.currentTime+.35);}
+function checkAnswers(){let c=0;document.querySelectorAll('.dropzone').forEach(z=>{z.classList.remove('correct','wrong');if(z.firstChild&&z.firstChild.textContent===z.dataset.answer){z.classList.add('correct');c++;}else z.classList.add('wrong');});document.getElementById('score').textContent=c+' / 5 pravilno';if(c===5){playVictory();document.getElementById('nextBtn').style.display='inline-block';}else{playFail();document.getElementById('nextBtn').style.display='none';}}
+function resetGame(){document.querySelectorAll('.dropzone').forEach(z=>{z.classList.remove('correct','wrong');while(z.firstChild)bank.appendChild(z.firstChild);});[...bank.children].sort(()=>Math.random()-0.5).forEach(x=>bank.appendChild(x));selected=null;document.querySelectorAll('.word').forEach(w=>w.classList.remove('selected'));document.querySelectorAll('.dropzone').forEach(d=>d.classList.remove('active'));updateProgress();document.getElementById('score').textContent='0 / 5 pravilno';document.getElementById('nextBtn').style.display='none';}
+</script>
+</body></html>
