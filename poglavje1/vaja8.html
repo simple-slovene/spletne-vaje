@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Simple Slovene - Kako ste?</title>
+<style>
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f7f4;color:#333}
+.container{max-width:1100px;margin:40px auto;padding:20px}
+.logo{text-align:center;margin-bottom:20px}
+.logo img{width:100%;max-width:460px;display:block;margin:auto}
+.instructions{text-align:center;font-size:26px;margin-bottom:20px}
+.progress-wrap{height:18px;background:#dfe9e1;border-radius:20px;overflow:hidden;margin-bottom:30px}
+.progress{width:0;height:100%;background:#56a56c;transition:.3s}
+.words,.images{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.words{margin-bottom:25px}
+.card,.word{background:#fff;border-radius:18px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.word{padding:14px;cursor:pointer;text-align:center;font-size:22px}
+.word.selected{background:#56a56c;color:#fff}
+.card{padding:18px}
+.icon{font-size:42px;text-align:center}
+.slot{margin-top:12px;min-height:48px;border:2px dashed #56a56c;border-radius:12px;background:#eef8f1;display:flex;align-items:center;justify-content:center}
+.slot.correct{border:3px solid #1b9e44}.slot.wrong{border:3px solid #d64040}
+.placeholder{font-style:italic;opacity:.45}
+.footer{text-align:center;margin-top:35px}
+button,#nextBtn{padding:12px 24px;border:none;border-radius:14px;background:#56a56c;color:#fff;margin:6px;text-decoration:none;display:inline-block}
+#nextBtn{display:none}
+@media(max-width:900px){.container{padding:12px}.words,.images{grid-template-columns:repeat(2,1fr);gap:10px}.word{font-size:18px;padding:10px}.instructions{font-size:20px}.icon{font-size:34px}}
+</style></head><body>
+<div class="container">
+<h1 class="logo"><img src="https://simple-slovene.github.io/spletne-vaje/slike/Logotip.png"></h1>
+<div class="instructions">Vaja 8 - Najprej izberite odgovor, potem pritisnite prazen prostor.</div>
+<div class="progress-wrap"><div class="progress" id="progress"></div></div>
+<div class="words" id="words"></div>
+<div class="images">
+<div class="card"><div class="icon">5️⃣ 🎉</div><div class="slot" data-answer="Odlično!"><span class="placeholder">prazen prostor</span></div></div>
+<div class="card"><div class="icon">4️⃣ 👍</div><div class="slot" data-answer="Dobro."><span class="placeholder">prazen prostor</span></div></div>
+<div class="card"><div class="icon">3️⃣ 😐</div><div class="slot" data-answer="Tako tako."><span class="placeholder">prazen prostor</span></div></div>
+<div class="card"><div class="icon">2️⃣ 🤒</div><div class="slot" data-answer="Nisem dobro."><span class="placeholder">prazen prostor</span></div></div>
+<div class="card"><div class="icon">1️⃣ 💔</div><div class="slot" data-answer="Slabo."><span class="placeholder">prazen prostor</span></div></div>
+</div>
+<div class="footer">
+<h2 id="score">0 / 5 pravilno</h2>
+
+
+<button onclick="checkAnswers()">✓ Preverite</button>
+<button id="restartBtn" onclick="restartExercise()" style="display:none;">↺ Začnite znova</button>
+
+<a id="nextBtn" href="https://simple-slovene.github.io/spletne-vaje/poglavje1/vaja9.html">➡ Naprej</a>
+</div></div>
+<script>
+const vals=[["😄 Odlično!","Odlično!"],["😊 Dobro.","Dobro."],["😬 Tako tako.","Tako tako."],["😕 Nisem dobro.","Nisem dobro."],["😭 Slabo.","Slabo."]];
+const wc=document.getElementById("words"),progress=document.getElementById("progress");
+let sel=null;
+function fill(){wc.innerHTML="";[...vals].sort(()=>Math.random()-.5).forEach(v=>{let d=document.createElement("div");d.className="word";d.dataset.value=v[1];d.textContent=v[0];d.onclick=()=>{document.querySelectorAll(".word").forEach(x=>x.classList.remove("selected"));if(sel===d){sel=null;return;}sel=d;d.classList.add("selected");};wc.appendChild(d);});}
+fill();
+document.querySelectorAll(".slot").forEach(s=>s.onclick=()=>{if(!sel)return;const ph=s.querySelector(".placeholder");if(ph)ph.remove();const old=s.querySelector(".word");if(old)wc.appendChild(old);document.querySelectorAll(".word").forEach(x=>x.classList.remove("selected"));s.appendChild(sel);sel=null;progress.style.width=(document.querySelectorAll(".slot .word").length/5*100)+"%";});
+function successSound(){const c=new(window.AudioContext||window.webkitAudioContext)();[523,659,784,1047].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type="triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);let t=c.currentTime+i*.08;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.18);o.start(t);o.stop(t+.19);});}
+function failSound(){const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.type="triangle";o.frequency.setValueAtTime(260,c.currentTime);o.frequency.linearRampToValueAtTime(170,c.currentTime+.35);o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.18,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.35);o.start();o.stop(c.currentTime+.35);}
+function checkAnswers(){let ok=0;document.querySelectorAll(".slot").forEach(s=>{s.classList.remove("correct","wrong");const w=s.querySelector(".word");if(w&&w.dataset.value===s.dataset.answer){s.classList.add("correct");ok++;}else{s.classList.add("wrong");}});document.getElementById("score").textContent=ok+" / 5 pravilno";
+
+if(ok===5){
+    successSound();
+    document.getElementById("nextBtn").style.display="inline-block";
+    document.getElementById("restartBtn").style.display="none";
+}else{
+    failSound();
+    document.getElementById("nextBtn").style.display="none";
+    document.getElementById("restartBtn").style.display="inline-block";
+}
+
+
+}
+
+function restartExercise(){
+
+    document.querySelectorAll(".slot").forEach(slot=>{
+        slot.classList.remove("correct","wrong");
+
+        const word=slot.querySelector(".word");
+        if(word) wc.appendChild(word);
+
+        slot.innerHTML='<span class="placeholder">prazen prostor</span>';
+    });
+
+    document.querySelectorAll(".word").forEach(w=>w.classList.remove("selected"));
+
+    sel=null;
+    progress.style.width="0%";
+    document.getElementById("score").textContent="0 / 5 pravilno";
+    document.getElementById("nextBtn").style.display="none";
+    document.getElementById("restartBtn").style.display="none";
+
+    fill();
+}
+</script></body></html>

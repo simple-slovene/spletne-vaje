@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Slovene - Osebni podatki</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#f3f7f4;
+color:#333;
+}
+
+.container{
+max-width:1100px;
+margin:40px auto;
+padding:20px;
+}
+
+.logo{
+text-align:center;
+margin-bottom:20px;
+}
+
+.logo img{
+width:100%;
+max-width:460px;
+height:auto;
+display:block;
+margin:auto;
+}
+
+.instructions{
+text-align:center;
+font-size:26px;
+margin-bottom:20px;
+}
+
+.progress-wrap{
+height:18px;
+background:#dfe9e1;
+border-radius:20px;
+overflow:hidden;
+margin-bottom:30px;
+}
+
+.progress{
+width:0%;
+height:100%;
+background:#56a56c;
+transition:.3s;
+}
+
+.game{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:40px;
+}
+
+.words{
+display:flex;
+flex-wrap:wrap;
+gap:15px;
+align-content:flex-start;
+}
+
+.word{
+background:white;
+padding:14px 22px;
+border-radius:14px;
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+cursor:pointer;
+font-size:22px;
+user-select:none;
+transition:.2s;
+}
+
+.word:hover{
+transform:translateY(-2px);
+}
+
+.word.selected{
+background:#56a56c;
+color:white;
+}
+
+.form{
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.row{
+display:grid;
+grid-template-columns:130px 1fr;
+align-items:center;
+margin-bottom:18px;
+font-size:22px;
+}
+
+.slot{
+min-height:48px;
+border:2px dashed #56a56c;
+border-radius:12px;
+background:#eef8f1;
+display:flex;
+align-items:center;
+padding:0 12px;
+cursor:pointer;
+transition:.2s;
+}
+
+.slot.correct{
+border:3px solid #1b9e44;
+background:#edf9f0;
+}
+
+.slot.wrong{
+border:3px solid #d64040;
+background:#fff3f3;
+}
+
+.footer{
+margin-top:35px;
+text-align:center;
+}
+
+button{
+padding:12px 24px;
+border:none;
+border-radius:14px;
+background:#56a56c;
+color:white;
+font-size:17px;
+cursor:pointer;
+margin:6px;
+transition:.2s;
+}
+
+button:hover{
+transform:translateY(-2px);
+}
+
+.secondary{
+background:#8aa59a;
+}
+
+#nextButton{
+display:none;
+}
+
+@media(max-width:900px){
+
+.game{
+grid-template-columns:1fr;
+}
+
+.row{
+grid-template-columns:110px 1fr;
+}
+
+.word{
+font-size:20px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 class="logo">
+<img src="https://simple-slovene.github.io/spletne-vaje/slike/Logotip.png" alt="Simple Slovene">
+</h1>
+
+<div class="instructions">
+Vaja 10 - Podatki niso urejeni. Uredite.
+</div>
+
+<div class="progress-wrap">
+<div class="progress" id="progress"></div>
+</div>
+
+<div class="game">
+
+<div class="words" id="words">
+
+<div class="word" data-value="Vanda">Vanda</div>
+<div class="word" data-value="Pregelj">Pregelj</div>
+<div class="word" data-value="ženska">ženska</div>
+<div class="word" data-value="30 let">30 let</div>
+<div class="word" data-value="psihologinja">psihologinja</div>
+
+</div>
+
+<div class="form">
+
+<div class="row">
+<div>Ime:</div>
+<div class="slot" data-answer="Vanda"></div>
+</div>
+
+<div class="row">
+<div>Priimek:</div>
+<div class="slot" data-answer="Pregelj"></div>
+</div>
+
+<div class="row">
+<div>Spol:</div>
+<div class="slot" data-answer="ženska"></div>
+</div>
+
+<div class="row">
+<div>Starost:</div>
+<div class="slot" data-answer="30 let"></div>
+</div>
+
+<div class="row">
+<div>Poklic:</div>
+<div class="slot" data-answer="psihologinja"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+<h2 id="score">0 / 5 pravilno</h2>
+
+<button onclick="checkAnswers()">
+✓ Preverite
+</button>
+
+<button id="resetButton"
+class="secondary"
+style="display:none"
+onclick="resetGame()">
+↺ Začnite znova
+</button>
+
+<button id="nextButton"
+style="display:none"
+onclick="window.location.href='https://simple-slovene.github.io/spletne-vaje/poglavje1/razlaga2.html'">
+➡ Naprej
+</button>
+
+
+</div>
+
+</div>
+
+<script>
+
+let selectedWord=null;
+
+const wordsContainer=document.getElementById("words");
+const progress=document.getElementById("progress");
+const score=document.getElementById("score");
+const nextButton=document.getElementById("nextButton");
+const resetButton=document.getElementById("resetButton");
+
+document.querySelectorAll(".word").forEach(word=>{
+
+word.addEventListener("click",()=>{
+
+document.querySelectorAll(".word").forEach(w=>w.classList.remove("selected"));
+
+if(selectedWord===word){
+selectedWord=null;
+return;
+}
+
+selectedWord=word;
+word.classList.add("selected");
+
+});
+
+});
+
+document.querySelectorAll(".slot").forEach(slot=>{
+
+slot.addEventListener("click",()=>{
+
+if(!selectedWord)return;
+
+// če je že odgovor v polju, ga vrni nazaj
+if(slot.firstChild){
+
+wordsContainer.appendChild(slot.firstChild);
+
+}
+
+// odstrani izbor iz stare besede
+document.querySelectorAll(".word").forEach(w=>w.classList.remove("selected"));
+
+slot.appendChild(selectedWord);
+
+selectedWord=null;
+
+updateProgress();
+
+});
+
+});
+
+function updateProgress(){
+
+let filled=0;
+
+document.querySelectorAll(".slot").forEach(slot=>{
+
+if(slot.firstChild)filled++;
+
+});
+
+progress.style.width=(filled/5*100)+"%";
+
+}
+
+function successSound(){
+
+const ctx=new(window.AudioContext||window.webkitAudioContext)();
+
+[523,659,784,1047].forEach((f,i)=>{
+
+const o=ctx.createOscillator();
+const g=ctx.createGain();
+
+o.type="triangle";
+o.frequency.value=f;
+
+o.connect(g);
+g.connect(ctx.destination);
+
+const t=ctx.currentTime+i*0.08;
+
+g.gain.setValueAtTime(.0001,t);
+g.gain.exponentialRampToValueAtTime(.18,t+.02);
+g.gain.exponentialRampToValueAtTime(.0001,t+.18);
+
+o.start(t);
+o.stop(t+.19);
+
+});
+
+}
+
+function failSound(){
+
+const ctx=new(window.AudioContext||window.webkitAudioContext)();
+
+const o=ctx.createOscillator();
+const g=ctx.createGain();
+
+o.type="triangle";
+o.frequency.setValueAtTime(260,ctx.currentTime);
+o.frequency.linearRampToValueAtTime(170,ctx.currentTime+.35);
+
+o.connect(g);
+g.connect(ctx.destination);
+
+g.gain.setValueAtTime(.18,ctx.currentTime);
+g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.35);
+
+o.start();
+o.stop(ctx.currentTime+.35);
+
+}
+
+function checkAnswers(){
+
+let correct=0;
+
+document.querySelectorAll(".slot").forEach(slot=>{
+
+slot.classList.remove("correct","wrong");
+
+if(slot.firstChild &&
+slot.firstChild.dataset.value===slot.dataset.answer){
+
+slot.classList.add("correct");
+correct++;
+
+}else{
+
+slot.classList.add("wrong");
+
+}
+
+});
+
+score.textContent=correct+" / 5 pravilno";
+if(correct===5){
+
+successSound();
+nextButton.style.display="inline-block";
+resetButton.style.display="none";
+
+}else{
+
+failSound();
+nextButton.style.display="none";
+resetButton.style.display="inline-block";
+
+}
+
+}
+
+function shuffleWords(){
+
+[...wordsContainer.children]
+.sort(()=>Math.random()-0.5)
+.forEach(card=>wordsContainer.appendChild(card));
+
+}
+
+function resetGame(){
+
+document.querySelectorAll(".slot").forEach(slot=>{
+
+slot.classList.remove("correct","wrong");
+
+while(slot.firstChild){
+
+wordsContainer.appendChild(slot.firstChild);
+
+}
+
+});
+
+document.querySelectorAll(".word").forEach(w=>w.classList.remove("selected"));
+
+selectedWord=null;
+
+shuffleWords();
+
+progress.style.width="0%";
+
+score.textContent="0 / 5 pravilno";
+
+nextButton.style.display="none";
+resetButton.style.display="none";
+
+}
+
+shuffleWords();
+
+
+
+
+
+</script>
+
+</body>
+</html>

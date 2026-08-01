@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Slovene - Poslušanje</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f3f7f4;
+    margin:0;
+    color:#333;
+}
+
+.container{
+    max-width:900px;
+    margin:30px auto;
+    padding:20px;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.logo img{
+    width:100%;
+    max-width:460px;
+    height:auto;
+    display:block;
+    margin:0 auto;
+}
+
+.instructions{
+    text-align:center;
+    font-size:24px;
+    margin:20px 0;
+}
+
+.progress-wrap{
+    height:18px;
+    background:#dfe9e1;
+    border-radius:20px;
+    overflow:hidden;
+    margin:25px 0;
+}
+
+.progress{
+    height:100%;
+    width:0%;
+    background:#56a56c;
+    transition:.3s;
+}
+
+iframe{
+    width:100%;
+    aspect-ratio:16/9;
+    border:none;
+    border-radius:12px;
+}
+
+.lyrics{
+    background:#fff;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+    font-size:24px;
+    line-height:2;
+}
+
+input{
+    font-size:22px;
+    padding:6px 10px;
+    border:2px solid #bbb;
+    border-radius:8px;
+    width:180px;
+    transition:.2s;
+}
+
+.correct{
+    border-color:#1f9b45;
+    background:#ecfff1;
+}
+
+.wrong{
+    border-color:#d63b3b;
+    background:#fff1f1;
+}
+
+.footer{
+    text-align:center;
+    margin-top:25px;
+}
+
+button,
+a.btn{
+    padding:12px 22px;
+    border:none;
+    border-radius:12px;
+    background:#56a56c;
+    color:#fff;
+    cursor:pointer;
+    text-decoration:none;
+    font-size:18px;
+}
+
+button:hover,
+a.btn:hover{
+    background:#478b59;
+}
+
+a.btn{
+    display:none;
+}
+
+.score{
+    font-size:22px;
+    margin:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 class="logo">
+<img src="https://simple-slovene.github.io/spletne-vaje/slike/Logotip.png" alt="Simple Slovene">
+</h1>
+
+<div class="instructions">
+Vaja 7 - Poslušajte in dopolnite.
+</div>
+
+<iframe
+src="https://www.youtube.com/embed/cCCzBILA91w"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen>
+</iframe>
+
+<div class="progress-wrap">
+    <div id="progress" class="progress"></div>
+</div>
+
+<div class="lyrics">
+
+
+
+<input id="a1" autocomplete="off">, življenje,<br>
+
+<input id="a2" autocomplete="off">, negativa!<br>
+
+Kaj bo jutri ne vem,<br>
+
+a ta moment tukaj šteje.<br>
+
+
+
+</div>
+
+<div class="footer">
+
+<div id="score" class="score">
+0 / 4 pravilno
+</div>
+
+<button onclick="checkAnswers()">
+
+✓ Preverite
+</button>
+<button
+id="resetButton"
+style="display:none;background:#8aa59a;"
+onclick="resetGame()">
+↺ Začnite znova
+</button>
+<a
+class="btn"
+id="nextBtn"
+href="https://simple-slovene.github.io/spletne-vaje/poglavje1/vaja8.html">
+➡ Naprej
+</a>
+
+</div>
+
+<script>
+const answers = [
+    {id:"a1", answer:"dober dan"},
+    {id:"a2", answer:"nasvidenje"},
+    {id:"a3", answer:"dober dan"},
+    {id:"a4", answer:"dobro jutro"}
+];
+
+// Posodabljanje vrstice napredka
+document.querySelectorAll("input").forEach(input=>{
+    input.addEventListener("input", updateProgress);
+});
+
+function updateProgress(){
+    let filled = 0;
+
+    document.querySelectorAll("input").forEach(input=>{
+        if(input.value.trim() !== ""){
+            filled++;
+        }
+    });
+
+    document.getElementById("progress").style.width =
+        (filled / answers.length * 100) + "%";
+}
+
+// Zvok - pravilen odgovor
+function successSound(){
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.value = 700;
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+}
+
+// Zvok - napačen odgovor
+function errorSound(){
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.value = 220;
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+}
+
+function checkAnswers(){
+
+    let correct = 0;
+
+    answers.forEach(item=>{
+
+        const input = document.getElementById(item.id);
+
+        input.classList.remove("correct");
+        input.classList.remove("wrong");
+
+        const value = input.value
+            .trim()
+            .toLowerCase();
+
+        const answer = item.answer
+            .trim()
+            .toLowerCase();
+
+        if(value === answer){
+
+            input.classList.add("correct");
+            correct++;
+
+        }else{
+
+            input.classList.add("wrong");
+
+        }
+
+    });
+
+    document.getElementById("score").textContent =
+        correct + " / " + answers.length + " pravilno";
+
+
+if(correct === answers.length){
+
+    successSound();
+    document.getElementById("nextBtn").style.display = "inline-block";
+    document.getElementById("resetButton").style.display = "none";
+
+}else{
+
+    errorSound();
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("resetButton").style.display = "inline-block";
+
+}
+
+}
+function resetGame(){
+
+    document.querySelectorAll("input").forEach(input=>{
+
+        input.value="";
+        input.classList.remove("correct","wrong");
+
+    });
+
+    document.getElementById("progress").style.width="0%";
+
+    document.getElementById("score").textContent=
+        "0 / " + answers.length + " pravilno";
+
+    document.getElementById("nextBtn").style.display="none";
+    document.getElementById("resetButton").style.display="none";
+
+}
+</script>
+
+</body>
+</html>
